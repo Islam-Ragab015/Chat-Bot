@@ -38,65 +38,69 @@ class _BotScreenState extends State<BotScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Bot'),
-        ),
-        body: Column(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            Expanded(
-              child: ListView.builder(
-                itemCount: _messages.length,
-                itemBuilder: (context, index) {
-                  final message = _messages[index];
-                  return Messages(
-                    isUser: message.isUser,
-                    message: message.message,
-                    date: DateFormat('HH:mm').format(message.date),
-                  );
-                },
-              ),
+      appBar: AppBar(
+        title: const Text('ChatBot'),
+        backgroundColor: Colors.deepPurpleAccent,
+        elevation: 0,
+      ),
+      backgroundColor: Colors.blueGrey[50],
+      body: Column(
+        children: [
+          Expanded(
+            child: ListView.builder(
+              itemCount: _messages.length,
+              itemBuilder: (context, index) {
+                final message = _messages[index];
+                return Messages(
+                  isUser: message.isUser,
+                  message: message.message,
+                  date: DateFormat('HH:mm').format(message.date),
+                );
+              },
             ),
-            Padding(
-              padding:
-                  const EdgeInsets.symmetric(horizontal: 8.0, vertical: 15),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 15,
-                    child: TextFormField(
-                      controller: _userMessage,
-                      decoration: InputDecoration(
-                        border: OutlineInputBorder(
-                            borderSide:
-                                const BorderSide(color: Colors.deepOrange),
-                            borderRadius: BorderRadius.circular(50)),
-                        label: const Text("Ask Gemini..."),
+          ),
+          Padding(
+            padding: const EdgeInsets.all(10.0),
+            child: Row(
+              children: [
+                Expanded(
+                  flex: 9,
+                  child: TextFormField(
+                    controller: _userMessage,
+                    style: const TextStyle(color: Colors.white),
+                    decoration: InputDecoration(
+                      filled: true,
+                      fillColor: Colors.deepPurpleAccent,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(50),
+                        borderSide: BorderSide.none,
                       ),
+                      hintText: 'Ask Gemini...',
+                      hintStyle: const TextStyle(color: Colors.white70),
+                      contentPadding: const EdgeInsets.symmetric(
+                          vertical: 15, horizontal: 20),
                     ),
                   ),
-                  const Spacer(),
-                  IconButton(
-                    padding: const EdgeInsets.all(15),
-                    iconSize: 30,
-                    style: ButtonStyle(
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.deepPurple),
-                      foregroundColor: WidgetStateProperty.all(Colors.white),
-                      shape: WidgetStateProperty.all(
-                        const CircleBorder(),
-                      ),
-                    ),
-                    onPressed: () {
-                      sendMessage();
-                    },
-                    icon: const Icon(Icons.send),
-                  )
-                ],
-              ),
-            )
-          ],
-        ));
+                ),
+                const SizedBox(width: 10),
+                IconButton(
+                  padding: const EdgeInsets.all(15),
+                  iconSize: 30,
+                  onPressed: sendMessage,
+                  icon: const Icon(Icons.send),
+                  color: Colors.white,
+                  style: ButtonStyle(
+                    backgroundColor:
+                        WidgetStateProperty.all(Colors.deepPurpleAccent),
+                    shape: WidgetStateProperty.all(const CircleBorder()),
+                  ),
+                )
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }
 
@@ -104,42 +108,57 @@ class Messages extends StatelessWidget {
   final bool isUser;
   final String message;
   final String date;
-  const Messages(
-      {super.key,
-      required this.isUser,
-      required this.message,
-      required this.date});
+
+  const Messages({
+    super.key,
+    required this.isUser,
+    required this.message,
+    required this.date,
+  });
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(15),
-      margin: const EdgeInsets.symmetric(vertical: 15).copyWith(
-        left: isUser ? 100 : 10,
-        right: isUser ? 10 : 100,
-      ),
-      decoration: BoxDecoration(
-        color: isUser ? Colors.deepPurple : Colors.grey.shade200,
-        borderRadius: BorderRadius.only(
-          topLeft: const Radius.circular(30),
-          bottomLeft: isUser ? const Radius.circular(30) : Radius.zero,
-          topRight: const Radius.circular(30),
-          bottomRight: isUser ? Radius.zero : const Radius.circular(30),
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 20),
+      child: Align(
+        alignment: isUser ? Alignment.centerRight : Alignment.centerLeft,
+        child: Container(
+          padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 20),
+          decoration: BoxDecoration(
+            color: isUser ? Colors.deepPurpleAccent : Colors.grey.shade300,
+            borderRadius: BorderRadius.only(
+              topLeft: const Radius.circular(30),
+              topRight: const Radius.circular(30),
+              bottomLeft: isUser ? const Radius.circular(30) : Radius.zero,
+              bottomRight: isUser ? Radius.zero : const Radius.circular(30),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                spreadRadius: 1,
+                blurRadius: 10,
+                offset: const Offset(0, 3),
+              )
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                message,
+                style: TextStyle(
+                    color: isUser ? Colors.white : Colors.black, fontSize: 16),
+              ),
+              const SizedBox(height: 5),
+              Text(
+                date,
+                style: TextStyle(
+                    color: isUser ? Colors.white70 : Colors.black54,
+                    fontSize: 12),
+              ),
+            ],
+          ),
         ),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            message,
-            style: TextStyle(color: isUser ? Colors.white : Colors.black),
-          ),
-          Text(
-            date,
-            style: TextStyle(color: isUser ? Colors.white : Colors.black),
-          ),
-        ],
       ),
     );
   }
