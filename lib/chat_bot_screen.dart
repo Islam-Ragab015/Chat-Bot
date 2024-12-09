@@ -44,61 +44,63 @@ class _BotScreenState extends State<BotScreen> {
         elevation: 0,
       ),
       backgroundColor: Colors.blueGrey[50],
-      body: Column(
-        children: [
-          Expanded(
-            child: ListView.builder(
-              itemCount: _messages.length,
-              itemBuilder: (context, index) {
-                final message = _messages[index];
-                return Messages(
-                  isUser: message.isUser,
-                  message: message.message,
-                  date: DateFormat('HH:mm').format(message.date),
-                );
-              },
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(
+              child: ListView.builder(
+                itemCount: _messages.length,
+                itemBuilder: (context, index) {
+                  final message = _messages[index];
+                  return Messages(
+                    isUser: message.isUser,
+                    message: message.message,
+                    date: DateFormat('HH:mm').format(message.date),
+                  );
+                },
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10.0),
-            child: Row(
-              children: [
-                Expanded(
-                  flex: 9,
-                  child: TextFormField(
-                    controller: _userMessage,
-                    style: const TextStyle(color: Colors.white),
-                    decoration: InputDecoration(
-                      filled: true,
-                      fillColor: Colors.deepPurpleAccent,
-                      border: OutlineInputBorder(
-                        borderRadius: BorderRadius.circular(50),
-                        borderSide: BorderSide.none,
+            Padding(
+              padding: const EdgeInsets.all(10.0),
+              child: Row(
+                children: [
+                  Expanded(
+                    flex: 9,
+                    child: TextFormField(
+                      controller: _userMessage,
+                      style: const TextStyle(color: Colors.white),
+                      decoration: InputDecoration(
+                        filled: true,
+                        fillColor: Colors.deepPurpleAccent,
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(50),
+                          borderSide: BorderSide.none,
+                        ),
+                        hintText: 'Ask Gemini...',
+                        hintStyle: const TextStyle(color: Colors.white70),
+                        contentPadding: const EdgeInsets.symmetric(
+                            vertical: 15, horizontal: 20),
                       ),
-                      hintText: 'Ask Gemini...',
-                      hintStyle: const TextStyle(color: Colors.white70),
-                      contentPadding: const EdgeInsets.symmetric(
-                          vertical: 15, horizontal: 20),
                     ),
                   ),
-                ),
-                const SizedBox(width: 10),
-                IconButton(
-                  padding: const EdgeInsets.all(15),
-                  iconSize: 30,
-                  onPressed: sendMessage,
-                  icon: const Icon(Icons.send),
-                  color: Colors.white,
-                  style: ButtonStyle(
-                    backgroundColor:
-                        WidgetStateProperty.all(Colors.deepPurpleAccent),
-                    shape: WidgetStateProperty.all(const CircleBorder()),
-                  ),
-                )
-              ],
+                  const SizedBox(width: 10),
+                  IconButton(
+                    padding: const EdgeInsets.all(15),
+                    iconSize: 30,
+                    onPressed: sendMessage,
+                    icon: const Icon(Icons.send),
+                    color: Colors.white,
+                    style: ButtonStyle(
+                      backgroundColor:
+                          WidgetStateProperty.all(Colors.deepPurpleAccent),
+                      shape: WidgetStateProperty.all(const CircleBorder()),
+                    ),
+                  )
+                ],
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -141,20 +143,42 @@ class Messages extends StatelessWidget {
               )
             ],
           ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
+          child: Row(
+            mainAxisAlignment:
+                isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
-              Text(
-                message,
-                style: TextStyle(
-                    color: isUser ? Colors.white : Colors.black, fontSize: 16),
-              ),
-              const SizedBox(height: 5),
-              Text(
-                date,
-                style: TextStyle(
-                    color: isUser ? Colors.white70 : Colors.black54,
-                    fontSize: 12),
+              // Only show the avatar for AI messages
+              if (!isUser)
+                const Padding(
+                  padding: EdgeInsets.only(right: 10),
+                  child: CircleAvatar(
+                    radius: 20,
+                    backgroundImage: AssetImage('assets/images/bot.png'),
+                  ),
+                ),
+              Flexible(
+                child: Column(
+                  crossAxisAlignment: isUser
+                      ? CrossAxisAlignment.end
+                      : CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      message,
+                      style: TextStyle(
+                          color: isUser ? Colors.white : Colors.black,
+                          fontSize: 16),
+                      overflow: TextOverflow.ellipsis,
+                      maxLines: 5,
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      date,
+                      style: TextStyle(
+                          color: isUser ? Colors.white70 : Colors.black54,
+                          fontSize: 12),
+                    ),
+                  ],
+                ),
               ),
             ],
           ),
