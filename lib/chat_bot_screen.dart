@@ -12,29 +12,32 @@ class BotScreen extends StatefulWidget {
 class _BotScreenState extends State<BotScreen> {
   final TextEditingController _userMessage = TextEditingController();
   final ScrollController _scrollController = ScrollController();
+  final GlobalKey<FormState> _formKey = GlobalKey<FormState>(); // Form Key
   static const apiKey = "AIzaSyA1RsZKtzCAfjq_opQQ8KJNuSRBrzkYhQM";
   final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
   final List<Message> _messages = [];
 
   Future<void> sendMessage() async {
-    final message = _userMessage.text;
-    _userMessage.clear();
+    if (_formKey.currentState?.validate() ?? false) {
+      final message = _userMessage.text;
+      _userMessage.clear();
 
-    setState(() {
-      _messages
-          .add(Message(isUser: true, message: message, date: DateTime.now()));
-    });
+      setState(() {
+        _messages
+            .add(Message(isUser: true, message: message, date: DateTime.now()));
+      });
 
-    final content = [Content.text(message)];
-    final response = await model.generateContent(content);
+      final content = [Content.text(message)];
+      final response = await model.generateContent(content);
 
-    setState(() {
-      _messages.add(Message(
-          isUser: false, message: response.text ?? "", date: DateTime.now()));
-    });
+      setState(() {
+        _messages.add(Message(
+            isUser: false, message: response.text ?? "", date: DateTime.now()));
+      });
 
-    // Scroll to the bottom after adding the AI response
-    _scrollToBottom();
+      // Scroll to the bottom after adding the AI response
+      _scrollToBottom();
+    }
   }
 
   // Automatically scroll to the bottom
@@ -74,41 +77,51 @@ class _BotScreenState extends State<BotScreen> {
             ),
             Padding(
               padding: const EdgeInsets.all(10.0),
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 9,
-                    child: TextFormField(
-                      controller: _userMessage,
-                      style: const TextStyle(color: Colors.white),
-                      decoration: InputDecoration(
-                        filled: true,
-                        fillColor: Colors.deepPurpleAccent,
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(50),
-                          borderSide: BorderSide.none,
+              child: Form(
+                key: _formKey, // Attach the form key
+                child: Row(
+                  children: [
+                    Expanded(
+                      flex: 9,
+                      child: TextFormField(
+                        controller: _userMessage,
+                        style: const TextStyle(color: Colors.white),
+                        decoration: InputDecoration(
+                          filled: true,
+                          fillColor: Colors.deepPurpleAccent,
+                          border: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(50),
+                            borderSide: BorderSide.none,
+                          ),
+                          hintText: 'Ask Gemini...',
+                          hintStyle: const TextStyle(color: Colors.white70),
+                          contentPadding: const EdgeInsets.symmetric(
+                              vertical: 15, horizontal: 20),
                         ),
-                        hintText: 'Ask Gemini...',
-                        hintStyle: const TextStyle(color: Colors.white70),
-                        contentPadding: const EdgeInsets.symmetric(
-                            vertical: 15, horizontal: 20),
+                        // Validation logic
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Please enter a message';
+                          }
+                          return null;
+                        },
                       ),
                     ),
-                  ),
-                  const SizedBox(width: 10),
-                  IconButton(
-                    padding: const EdgeInsets.all(15),
-                    iconSize: 30,
-                    onPressed: sendMessage,
-                    icon: const Icon(Icons.send),
-                    color: Colors.white,
-                    style: ButtonStyle(
-                      backgroundColor:
-                          WidgetStateProperty.all(Colors.deepPurpleAccent),
-                      shape: WidgetStateProperty.all(const CircleBorder()),
+                    const SizedBox(width: 10),
+                    IconButton(
+                      padding: const EdgeInsets.all(15),
+                      iconSize: 30,
+                      onPressed: sendMessage,
+                      icon: const Icon(Icons.send),
+                      color: Colors.white,
+                      style: ButtonStyle(
+                        backgroundColor:
+                            WidgetStateProperty.all(Colors.deepPurpleAccent),
+                        shape: WidgetStateProperty.all(const CircleBorder()),
+                      ),
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ],
