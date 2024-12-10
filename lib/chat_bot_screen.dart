@@ -11,11 +11,9 @@ class BotScreen extends StatefulWidget {
 
 class _BotScreenState extends State<BotScreen> {
   final TextEditingController _userMessage = TextEditingController();
-
+  final ScrollController _scrollController = ScrollController();
   static const apiKey = "AIzaSyA1RsZKtzCAfjq_opQQ8KJNuSRBrzkYhQM";
-
   final model = GenerativeModel(model: 'gemini-pro', apiKey: apiKey);
-
   final List<Message> _messages = [];
 
   Future<void> sendMessage() async {
@@ -29,10 +27,23 @@ class _BotScreenState extends State<BotScreen> {
 
     final content = [Content.text(message)];
     final response = await model.generateContent(content);
+
     setState(() {
       _messages.add(Message(
           isUser: false, message: response.text ?? "", date: DateTime.now()));
     });
+
+    // Scroll to the bottom after adding the AI response
+    _scrollToBottom();
+  }
+
+  // Automatically scroll to the bottom
+  void _scrollToBottom() {
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 300),
+      curve: Curves.easeOut,
+    );
   }
 
   @override
@@ -49,6 +60,7 @@ class _BotScreenState extends State<BotScreen> {
           children: [
             Expanded(
               child: ListView.builder(
+                controller: _scrollController,
                 itemCount: _messages.length,
                 itemBuilder: (context, index) {
                   final message = _messages[index];
@@ -95,7 +107,7 @@ class _BotScreenState extends State<BotScreen> {
                           WidgetStateProperty.all(Colors.deepPurpleAccent),
                       shape: WidgetStateProperty.all(const CircleBorder()),
                     ),
-                  )
+                  ),
                 ],
               ),
             ),
@@ -147,7 +159,6 @@ class Messages extends StatelessWidget {
             mainAxisAlignment:
                 isUser ? MainAxisAlignment.end : MainAxisAlignment.start,
             children: [
-              // Only show the avatar for AI messages
               if (!isUser)
                 const Padding(
                   padding: EdgeInsets.only(right: 10),
